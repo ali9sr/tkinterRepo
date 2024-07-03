@@ -14,6 +14,8 @@ root.title('Password Generator Plus')
 
 root.geometry('400x300')
 root.resizable(False, False)
+
+
 # root.overrideredirect(True)
 
 
@@ -61,3 +63,5 @@ if not os.path.exists('CONFIG.txt'):
     root.destroy()
 
 root.mainloop()
+
+#:lHaTT96U>bF{:V"

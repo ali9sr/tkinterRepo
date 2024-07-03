@@ -2,6 +2,7 @@ from tkinter import *
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 import os
+import sqlite3
 
 root = Tk()
 root.geometry('300x300')
@@ -14,7 +15,23 @@ def makeFile(name, email, phone):
     with open('CONFIG.txt', 'w') as f:
         f.write(f'name={name}/email={email}/phone={phone}')
         f.close()
-
+    conn = sqlite3.connect("Personal_Information.db")
+    c = conn.cursor()
+    try:
+        c.execute("""CREATE TABLE if not exists Personal_Information(   
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            Full_name VARCHAR(255) NOT NULL,
+            Email VARCHAR(255) NOT NULL,
+            Phone VARCHAR(255) NOT NULL
+        )""")
+        conn.commit()
+        sql = 'INSERT INTO Personal_Information(Full_name, Email, Phone) VALUES (?, ?, ?)'
+        c.execute(sql, (name, email, phone))
+        conn.commit()
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        conn.close()
     root.destroy()
     os.system('python main.py')
 

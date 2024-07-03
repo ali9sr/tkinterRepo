@@ -1,10 +1,13 @@
 import tkinter
 from tkinter import *
+from tkinter import messagebox
+
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 import string
 import os
 from random import choices
+import sqlite3
 
 root = Tk()
 # root.geometry('400x300')
@@ -17,6 +20,8 @@ checkboxv_L = tkinter.BooleanVar()
 checkboxv_U = tkinter.BooleanVar()
 checkboxv_D = tkinter.BooleanVar()
 checkboxv_P = tkinter.BooleanVar()
+
+global labelpasss
 
 
 def backToMainMenu():
@@ -57,7 +62,7 @@ def GeneratePass():
     # print(f'Uppercase: {checkboxv_U.get()}')
     # print(f'Digits: {checkboxv_D.get()}')
     # print(f'Punctuation: {checkboxv_P.get()}')
-
+    global labelpasss
     var = StringVar()
     uppercase = checkboxv_U.get()
     lowercase = checkboxv_L.get()
@@ -89,16 +94,37 @@ def GeneratePass():
     context_menu = Menu(root, tearoff=0)
     context_menu.add_command(label='Copy', command=copy_to_clipboard)
 
-    labelpass = Entry(root, state='readonly', readonlybackground='white', fg='black', font=('Calibri', 14),justify='center')
+    labelpass = Entry(root, state='readonly', readonlybackground='white', fg='black', font=('Calibri', 14),
+                      justify='center')
 
     var.set(pass_maker(length=Length, uppercase=uppercase, lowercase=lowercase, digits=digits, pun=punc))
     labelpass.config(textvariable=var)
     labelpass.grid(row=1, column=1, columnspan=2, sticky=W + E, padx=8, pady=18, ipadx=8)
     labelpass.bind('<Button-3>', show_context_menu)
+    labelpasss = labelpass.get()
 
 
 def savetodb():
-    pass
+    global labelpasss
+    print(labelpasss)
+    conn = sqlite3.connect("Passwords.db")
+    c = conn.cursor()
+    section = "Random Password"
+    try:
+        c.execute("""CREATE TABLE if not exists Passwords(   
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            Password VARCHAR(255) NOT NULL,
+            Section VARCHAR(255) NOT NULL
+        )""")
+        conn.commit()
+        sql = 'INSERT INTO Passwords(Password, Section) VALUES (?, ?)'
+        c.execute(sql, (labelpasss, section))
+        conn.commit()
+        messagebox.showinfo('save to database', 'ba movafaghiat zakhire shod')
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        conn.close()
 
 
 def on_click(event):
@@ -119,7 +145,7 @@ buttonGenerate = ttk.Button(root, text='Generate Password', command=lambda: Gene
 buttonBackMain = ttk.Button(root, text='Back Main Menu', command=backToMainMenu)
 buttonSaveToDb = ttk.Button(root, text='Save Password', command=savetodb)
 
-lengthEntry = ttk.Entry(root,justify='center')
+lengthEntry = ttk.Entry(root, justify='center')
 lengthEntry.insert(0, 'Pishfarz 8')
 on_click_id = lengthEntry.bind('<Button-1>', on_click)
 lengthLabel = ttk.Label(root, text='Password Length:', font=('Calibri', 12))
